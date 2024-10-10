@@ -1,13 +1,12 @@
 import sys
 import tty
 import termios
-from datetime import datetime as dt
 
 from logger import Logger
-from game import Game
+from game import Board, Game
 
 def main():
-    game = Game()
+    game = Game(board=Board.from_file("boards/big-x.ttt"))
     game.run()
 
 if __name__ == "__main__":

@@ -1,8 +1,7 @@
 import sys
-from typing import Optional
+from typing import Callable, Optional
 
 from board import Board, Cell
-from logger import Logger
 
 class Game:
     win_req: int
@@ -10,11 +9,13 @@ class Game:
     board: Board
     cursor: tuple[int, int]
 
-    def __init__(self, /, win_req: int = 3, board_shape: Optional[list[list[bool]]] = None) -> None:
-        self.board = Board() if board_shape is None else Board(board_shape)
+
+    def __init__(self, /, win_req: int = 3, board: Optional[Board] = None) -> None:
+        self.board = board or Board()
         self.win_req = win_req
         self.turn = Cell.CROSS
         self.cursor = (0, 0)
+
 
     def run(self) -> None:
         print("\n".join(["h/j/k/l: ↑/↓/←/→", "space: place", "q: quit", "-------"]))
@@ -67,7 +68,7 @@ class Game:
             print("It's a tie...")
         else:
             print(f"Player {int(self.turn) + 1} ({self.turn}) wins!")
-        
+
 
     def play(self, x: int, y: int) -> bool:
         if self.board.get(x, y) != Cell.EMPTY:
@@ -76,45 +77,37 @@ class Game:
         self.board.set(x, y, self.turn)
         return True
 
+
     def check_win(self) -> bool:
-        offset_cursor = lambda t: (self.cursor[0] + dir[0] * t, self.cursor[1] + dir[1] * t)
+        offset_cursor: Callable[[int], tuple[int, int]] = \
+            lambda t: (self.cursor[0] + dir[0] * t, self.cursor[1] + dir[1] * t)
 
         for dir in [(0, 1), (1, 1), (1, 0), (1, -1)]:
             start: int = 0
             end: int = 0
 
-            for i in range(self.win_req):
+            for i in range(1, self.win_req):
                 offset = offset_cursor(-i)
 
-                if not self.board.contains(*offset):
-                    break
-                if self.board.get(*offset) != self.turn:
+                if self.board.safe_get(*offset) != self.turn:
                     break
 
                 start -= 1
 
-            for i in range(self.win_req):
+            for i in range(1, self.win_req):
                 offset = offset_cursor(i)
 
-                if not self.board.contains(*offset):
-                    break
-                if self.board.get(*offset) != self.turn:
+                if self.board.safe_get(*offset) != self.turn:
                     break
 
                 end += 1
 
-            if end - start == self.win_req + 1:
+            # +1 for the cell we just set
+            if end - start + 1 == self.win_req:
                 return True
 
-            # for i in range(self.win_req - 1):
-            #     cell = self.board.get(*offset(i))
-            #     Logger.log(f"Checking offset {self.cursor} + {dir} * {i}: '{cell}'") 
-            #     if cell != self.turn:
-            #         break
-            # else:
-            #     return True
-
         return False
+
 
     def ui(self, additional_lines: list[str] = []) -> str:
         lines = [
