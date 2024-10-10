@@ -2,7 +2,8 @@ from typing import Optional, Self
 from enum import IntEnum
 
 class Cell(IntEnum):
-    BLOCK = -2
+    BLOCK = -42
+    PATH = -2
     EMPTY = -1
     CROSS = 0
     CIRCL = 1
@@ -11,6 +12,8 @@ class Cell(IntEnum):
     def __str__(self) -> str:
         match self:
             case Cell.BLOCK:
+                return '▒'
+            case Cell.PATH:
                 return '░'
             case Cell.EMPTY:
                 return ' '
@@ -21,9 +24,11 @@ class Cell(IntEnum):
 
 
 DEFAULT_BOARD: list[list[bool]] = [
-    [True, True, False],
-    [True, True, True],
-    [True, True, True],
+    [False, False, False, False, False],
+    [False, True,  True,  True,  False],
+    [False, True,  True,  True,  False],
+    [False, True,  True,  True,  False],
+    [False, False, False, False, False],
 ]
 
 class Board:
@@ -45,9 +50,24 @@ class Board:
     @classmethod
     def from_file(cls: type[Self], path: str) -> Self:
         with open(path) as file:
-            true_char = file.readline()[0]
-            board_shape = [[c == true_char for c in line.strip()] for line in file]
-            return cls(board_shape)
+            try:
+                [empty_char, path_char, *_] = file.readline().strip()
+            except:
+                raise Exception("Invalid map metadata format")
+
+            cmap = { empty_char: Cell.EMPTY, path_char: Cell.PATH }
+            cells = [[
+                Cell.BLOCK, 
+                *[cmap.get(c) if c in cmap else Cell.BLOCK for c in line.strip()],
+                Cell.BLOCK,
+            ] for line in file]
+                
+            lid = [Cell.BLOCK] * max(map(lambda row: len(row), cells))
+
+            board = cls()
+            board.cells = [lid, *cells, lid] # type: ignore
+
+            return board
 
     def size(self) -> tuple[int, int]:
         return (self.width(), self.height())

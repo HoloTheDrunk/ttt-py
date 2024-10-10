@@ -4,10 +4,12 @@ import termios
 
 from logger import Logger
 from game import Board, Game
+from menu import Menu
 
 def main():
-    game = Game(board=Board.from_file("boards/big-x.ttt"))
-    game.run()
+    Menu().run()
+    # game = Game(board=Board.from_file("boards/big-x.ttt"))
+    # game.run()
 
 if __name__ == "__main__":
     stdin = sys.stdin.fileno()

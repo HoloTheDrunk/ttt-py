@@ -14,11 +14,19 @@ class Game:
         self.board = board or Board()
         self.win_req = win_req
         self.turn = Cell.CROSS
-        self.cursor = (0, 0)
+        self.cursor = (1, 1)
+        while self.board.get(*self.cursor) == Cell.BLOCK:
+            x, y = self.cursor
+            if x + 1 < self.board.width():
+                self.cursor = (x + 1, y)
+            elif y + 1 < self.board.height():
+                self.cursor = (0, y + 1)
+            else:
+                raise Exception("Invalid map: no empty spaces")
 
 
     def run(self) -> None:
-        print("\n".join(["h/j/k/l: ↑/↓/←/→", "space: place", "q: quit", "-------"]))
+        print("\n".join(["h/j/k/l: ←/↓/↑/→", "space: place", "q: quit", "-------"]))
 
         win: int = -1
 

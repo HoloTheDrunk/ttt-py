@@ -11,4 +11,4 @@ class Logger(metaclass=Singleton):
     @staticmethod
     def log(msg: str):
         with open("log", "a") as file:
-            file.write(f'[{dt.now().strftime("%H:%M:%S")}] {msg}\n')
+            file.write(f'[{dt.now().strftime("%H:%M:%S")}] {msg}\n') 
