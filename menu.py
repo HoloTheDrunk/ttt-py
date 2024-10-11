@@ -14,8 +14,10 @@ class Menu:
     cursor: int
     scroll: int
 
+    instructions = ["j/k: ↓/↑", "space: select", "q: quit", "-------"]
 
-    def __init__(self, directory: str = "boards", dim: tuple[int, int] = (80, 5)) -> None:
+
+    def __init__(self, directory: str = "boards", dim: tuple[int, int] = (80, 24)) -> None:
         self.boards = []
         for file in os.listdir(directory):
             if file[-4:] != '.ttt':
@@ -24,21 +26,20 @@ class Menu:
         self.boards.sort(key=lambda tup: tup[0])
 
         self.longest_name = max(map(lambda board: len(board[0]), self.boards))
-        self.dim = dim
+        self.dim = (dim[0], dim[1] - (len(Menu.instructions) + 1))
         self.cursor = 0
         self.scroll = 0
 
 
     def run(self) -> None:
-        instructions = ["j/k: ↓/↑", "space: select", "q: quit", "-------"]
-        print("\n".join(instructions))
-
         picked = -1
+
+        send(f"\033[{self.dim[1]-1}S\033[H")
+        send("\n".join(Menu.instructions))
+        send(f"\033[{len(Menu.instructions) + 1};1H")
 
         while picked == -1:
             list_view = self.list_view()
-            
-            Logger.log(list_view)
 
             send(list_view)
 
@@ -76,7 +77,7 @@ class Menu:
                 break
 
         if picked != -1:
-            true_height = len(instructions) + self.dim[1]
+            true_height = len(Menu.instructions) + self.dim[1]
             board = self.boards[picked][1]
             send('\033[2K\033[E' * true_height + f'\033[{true_height}F')
             Game(board=board).run()

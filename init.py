@@ -1,3 +1,4 @@
+import os
 import sys
 import tty
 import termios
@@ -7,7 +8,7 @@ from game import Board, Game
 from menu import Menu
 
 def main():
-    Menu().run()
+    Menu(dim=os.get_terminal_size()).run()
     # game = Game(board=Board.from_file("boards/big-x.ttt"))
     # game.run()
 
