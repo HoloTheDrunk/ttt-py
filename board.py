@@ -117,8 +117,28 @@ class Board:
 
 
     def __str__(self) -> str:
-        return "\n".join(
-            '|' + 
-                ' '.join(map(lambda c: str(c), self.cells[y]))
-            + '|'
-            for y in range(self.height()))
+        s: list[str] = []
+        for row in self.cells:
+            s.append('|')
+            for x in range(2 * len(row)):
+                # Cell
+                if x % 2 == 0:
+                    s.append(str(row[x // 2]))
+                    continue
+
+                # Filler
+                if x > 0 and x < 2 * len(row) - 1:
+                    if row[x // 2] == Cell.BLOCK and row[x // 2 + 1] == Cell.BLOCK:
+                        s.append(str(Cell.BLOCK))
+                    elif row[x // 2] in [Cell.CROSS, Cell.CIRCL]:
+                        s.append(str(Cell.EMPTY))
+                    else:
+                        s.append(str(row[x // 2]))
+            s.append('|\n')
+        return ''.join(s[:-1])
+
+        # return "\n".join(
+        #     '|' + 
+        #         ' '.join(map(lambda c: str(c), self.cells[y]))
+        #     + '|'
+        #     for y in range(self.height()))
